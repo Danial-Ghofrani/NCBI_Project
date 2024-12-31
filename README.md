@@ -17,5 +17,5 @@ To use BiogenExplorer, follow these steps:
 
 1. **Clone the Repository:**
    ```bash
-   git clone https://github.com/your-repo/BiogenExplorer.git
+   git clone https://github.com/Danial-Ghofrani/NCBI_Project.git
    cd BiogenExplorer
