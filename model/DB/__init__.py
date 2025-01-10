@@ -1,6 +1,7 @@
 import os
 import mysql.connector
 from mysql.connector import Error
+import re
 
 
 # Function to get file details
@@ -15,7 +16,35 @@ def get_files(folder_path):
     return file_details
 
 
-# Function to connect to MySQL and create table
+def process_files_to_fasta(folder_path):
+    for root, _, files in os.walk(folder_path):
+        for file in files:
+            if not file.endswith(".fasta"):
+                # Convert non-FASTA files to FASTA format
+                original_file_path = os.path.join(root, file)
+                fasta_file_path = original_file_path + ".fasta"
+                with open(original_file_path, 'r') as input_file, open(fasta_file_path, 'w') as output_file:
+                    # Add a dummy header if missing
+                    output_file.write(f">Converted_{file}\n")
+                    output_file.write(input_file.read())
+                print(f"Converted to FASTA: {fasta_file_path}")
+
+
+def clean_fasta_sequence(folder_path):
+    for root, _, files in os.walk(folder_path):
+        for file in files:
+            if file.endswith(".fasta"):
+                file_path = os.path.join(root, file)
+                with open(file_path, 'r') as fasta_file:
+                    cleaned_lines = []
+                    for line in fasta_file:
+                        if line.startswith(">") or line.strip():
+                            cleaned_lines.append(line.strip())
+                with open(file_path, 'w') as fasta_file:
+                    fasta_file.write("\n".join(cleaned_lines))
+                print(f"Cleaned: {file_path}")
+
+
 def create_table_and_insert_data(folder_paths):
     try:
         # Connect to MySQL database
@@ -94,4 +123,9 @@ def create_table_and_insert_data(folder_paths):
 # Main function
 gene_sample_path = r'C:\Users\mrnaj\OneDrive\Desktop\genes sample'
 genome_sample_path = r'C:\Users\mrnaj\OneDrive\Desktop\whole_genome'
+
+process_files_to_fasta(gene_sample_path)
+# process_files_to_fasta(genome_sample_path)
+clean_fasta_sequence(gene_sample_path)
+
 create_table_and_insert_data([gene_sample_path, genome_sample_path])
