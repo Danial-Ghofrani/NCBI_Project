@@ -3,9 +3,9 @@ from model.DB.db_model import DB
 from model.entity.blast_model import BLAST
 from model.entity.duplicate import *
 from model.entity.analysis import *
-from concatenate import *
-from combine import *
-from gene_diversity_chart import *
+# from concatenate import *
+# from combine import *
+# from gene_diversity_chart import *
 import time
 
 
@@ -15,7 +15,7 @@ start_time = datetime.now()
 db_info = {
     'host': 'localhost',
     'user': 'root',
-    'password': 'mrnd181375',
+    'password': 'root123',
     'database': 'wgs'
 }
 
@@ -24,6 +24,8 @@ Gene = "mepa"
 identity = 85
 coverage = 90
 db = DB(Gene, db_info)
+
+
 db.create_combined_wgs()
 
 # Create a list of genes from database for blast
@@ -46,7 +48,7 @@ for gene in genes_list:
     analysis.process_analysis(['gene_analysis.xlsx', 'genome_gene.xlsx'])
     db.export_table(gene.name, gene.name, 'excel')
 
-output_dir = 'C://Users//mrnaj//PycharmProjects//NCBI_project_2//concatenate//result'
+output_dir = r'C:\Users\Mahdiar\Desktop\blast_result'
 print("Starting concatenation...")
 # concatenate = Concatenate(db_info, output_dir)
 # concatenate.process_concatenation()
@@ -56,17 +58,20 @@ print("Starting concatenation...")
 # print("Combining FASTA files...")
 # combine_files()
 # print("Combination complete.")
+# exit()
 
 # Step 5: Generate gene diversity chart
-print("Generating gene diversity chart...")
-generate_chart()
-print("Chart generation complete.")
-source_folder = r"C:\Users\mrnaj\PycharmProjects\NCBI_project_2"
-destination_folder = r"C:\Users\mrnaj\PycharmProjects\NCBI_project_2\results"
-exclude_items = ["combined_wgs.fasta", "wgs", "model", "concatenate", ".git", ".idea", "main.py", "combine.py", "concatenate.py", "gene_diversity_chart.py"]
-rar_file_name = 'C:/Users/mrnaj/PycharmProjects/NCBI_project_2/results.rar'
-
-# db.organize_sequences_by_cutoff(table_name)
+# print("Generating gene diversity chart...")
+# generate_chart()
+# print("Chart generation complete.")
+# source_folder = r"C:\Users\mrnaj\PycharmProjects\NCBI_project_2"
+# destination_folder = r"C:\Users\mrnaj\PycharmProjects\NCBI_project_2\results"
+# exclude_items = ["combined_wgs.fasta", "wgs", "model", "concatenate", ".git", ".idea", "main.py", "combine.py", "concatenate.py", "gene_diversity_chart.py"]
+# rar_file_name = 'C:/Users/mrnaj/PycharmProjects/NCBI_project_2/results.rar'
+table_name = "yajc"
+folder_path = r"C:\Users\Mahdiar\Desktop\blast_result"
+db.organize_sequences_by_cutoff(table_name, folder_path)
+db.organize_sequences_by_cutoff_and_duplicate(table_name, folder_path)
 # db.move_files_to_results(source_folder, destination_folder, exclude_items)
 # db.create_rar_from_folder(destination_folder, rar_file_name)
 end_time = datetime.now()

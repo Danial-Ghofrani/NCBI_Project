@@ -1,6 +1,5 @@
 import os
 import shutil
-import patoolib
 import pandas as pd
 import mysql.connector
 from ..entity.gene import *
@@ -300,7 +299,8 @@ class DB:
                         else:
                             outfile.write(line)
 
-    def organize_sequences_by_cutoff(self, table_name):
+    def organize_sequences_by_cutoff(self, table_name, folder_path):
+        self.connect()
         cursor = self.mydb.cursor()
         cursor.execute(f"SELECT sseq_path FROM {table_name} WHERE cutoff = 1")
         rows = cursor.fetchall()
@@ -309,6 +309,7 @@ class DB:
         processed_files = set()
 
         for sseq_path in rows:
+            sseq_path = str(sseq_path[0])
             if not os.path.exists(sseq_path):
                 print(f"File not found: {sseq_path}")
                 continue
@@ -317,7 +318,7 @@ class DB:
             gene_name = table_name
 
             # Organize by cutoff analysis
-            gene_folder = os.path.join(self.result_dir, gene_name, "cutoff")
+            gene_folder = os.path.join(folder_path, gene_name, "cutoff")
             os.makedirs(gene_folder, exist_ok=True)
 
             # Retain original file name without appending genome_name
@@ -334,52 +335,49 @@ class DB:
             with open(sseq_path, 'r') as source_file, open(target_file_path, 'w') as target_file:
                 target_file.write(source_file.read())
                 print(f"Saved: {target_file_path}")
+        self.disconnect()
 
         print("File organization complete.")
 
-    # def organize_sequences_by_cutoff_and_duplicate(self, table_name):
-    #     """
-    #     Organizes sequence files from the cutoff_1 folder into a new folder based on the duplicate column.
-    #     This function should be called after the duplicate column has been populated.
-    #     """
-    #     self.connect()
-    #
-    #     # Define folders
-    #     base_folder = f"{self.gene}_seq_folder"
-    #     cutoff_folder = os.path.join(base_folder, "cutoff_1")
-    #     cutoff_duplicate_folder = os.path.join(base_folder, "cutoff_1_duplicate_1")
-    #
-    #     os.makedirs(cutoff_duplicate_folder, exist_ok=True)
-    #
-    #     # Fetch all records from the database
-    #     query = f"""
-    #         SELECT id, query_id, genome_name, qseq_path, sseq_path, duplicate
-    #         FROM {table_name}
-    #         WHERE cutoff = 1;  # Only retrieve records where cutoff is already 1
-    #     """
-    #     self.cursor.execute(query)
-    #     records = self.cursor.fetchall()
-    #
-    #     # Step 1: Copy files from cutoff_1 to cutoff_1_duplicate_1 if duplicate == 1
-    #     for record in records:
-    #         _, _, _, qseq_path, sseq_path, duplicate = record
-    #
-    #         # Destination paths in the cutoff_duplicate_folder
-    #         cutoff_dup_qseq_path = os.path.join(cutoff_duplicate_folder, os.path.basename(qseq_path))
-    #         cutoff_dup_sseq_path = os.path.join(cutoff_duplicate_folder, os.path.basename(sseq_path))
-    #
-    #         # Only copy files if duplicate == 1
-    #         if duplicate == 1:
-    #             cutoff_qseq_path = os.path.join(cutoff_folder, os.path.basename(qseq_path))
-    #             cutoff_sseq_path = os.path.join(cutoff_folder, os.path.basename(sseq_path))
-    #
-    #             if os.path.exists(cutoff_qseq_path):
-    #                 shutil.copy(cutoff_qseq_path, cutoff_dup_qseq_path)
-    #             if os.path.exists(cutoff_sseq_path):
-    #                 shutil.copy(cutoff_sseq_path, cutoff_dup_sseq_path)
-    #
-    #     self.disconnect()
-    #     print("Sequences organized by cutoff and duplicate values.")
+    def organize_sequences_by_cutoff_and_duplicate(self, table_name, folder_path):
+        self.connect()
+        cursor = self.mydb.cursor()
+        cursor.execute(f"SELECT sseq_path FROM {table_name} WHERE cutoff = 1 and duplicate = 1")
+        rows = cursor.fetchall()
+
+        # Track processed files to avoid duplication
+        processed_files = set()
+
+        for sseq_path in rows:
+            sseq_path = str(sseq_path[0])
+            if not os.path.exists(sseq_path):
+                print(f"File not found: {sseq_path}")
+                continue
+
+            # Use the table name as the gene name
+            gene_name = table_name
+
+            # Organize by cutoff analysis
+            gene_folder = os.path.join(folder_path, gene_name, "cutoff_1_duplicate_1")
+            os.makedirs(gene_folder, exist_ok=True)
+
+            # Retain original file name without appending genome_name
+            target_file_name = os.path.basename(sseq_path)
+            target_file_path = os.path.join(gene_folder, target_file_name)
+
+            if target_file_path in processed_files:
+                print(f"Skipping duplicate file: {target_file_name}")
+                continue
+
+            processed_files.add(target_file_path)
+
+            # Write the file content
+            with open(sseq_path, 'r') as source_file, open(target_file_path, 'w') as target_file:
+                target_file.write(source_file.read())
+                print(f"Saved: {target_file_path}")
+        self.disconnect()
+
+        print("File organization complete.")
 
     def move_files_to_results(self, source_folder, destination_folder, exclude_items):
         # Ensure destination folder exists

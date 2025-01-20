@@ -51,7 +51,7 @@ def create_table_and_insert_data(folder_paths):
         connection = mysql.connector.connect(
             host='localhost',
             user='root',
-            password='mrnd181375',
+            password='root123',
         )
 
         if connection.is_connected():
@@ -121,8 +121,8 @@ def create_table_and_insert_data(folder_paths):
 
 
 # Main function
-gene_sample_path = r'C:\Users\mrnaj\OneDrive\Desktop\genes sample'
-genome_sample_path = r'C:\Users\mrnaj\OneDrive\Desktop\whole_genome'
+gene_sample_path = r'C:\Users\Mahdiar\Desktop\Negar genes'
+genome_sample_path = r'C:\Users\Mahdiar\Desktop\wgs'
 
 process_files_to_fasta(gene_sample_path)
 # process_files_to_fasta(genome_sample_path)
