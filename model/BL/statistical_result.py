@@ -2,7 +2,7 @@ import mysql.connector
 import pandas as pd
 
 
-class Analysis:
+class StatisticalResult:
     def __init__(self, db_info):
         self.db_info = db_info
         self.mydb = None
@@ -22,7 +22,7 @@ class Analysis:
     def create_analysis_table(self):
         cursor = self.mydb.cursor()
         create_table_query = """
-        CREATE TABLE IF NOT EXISTS gene_analysis (
+        CREATE TABLE IF NOT EXISTS statistical_result (
             gene_name VARCHAR(100) PRIMARY KEY,
             gene_presence_count INT,
             gene_presence_percentage FLOAT,

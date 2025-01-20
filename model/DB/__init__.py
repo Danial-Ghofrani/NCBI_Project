@@ -81,8 +81,25 @@ def create_table_and_insert_data(folder_paths):
                             UNIQUE(file_path(255))
                         )
                         '''
+
+            create_statistical_result_table_query = """
+                    CREATE TABLE IF NOT EXISTS statistical_result (
+                        gene_name VARCHAR(100) PRIMARY KEY,
+                        gene_presence_count INT,
+                        gene_presence_percentage FLOAT,
+                        cutoff_count INT,
+                        cutoff_percentage FLOAT,
+                        duplicate_count INT,
+                        duplicate_percentage FLOAT,
+                        diversity_count INT,
+                        diversity_percentage FLOAT,
+                        distinct_gene_presence_count INT
+
+                    )
+                    """
             cursor.execute(create_genes_table_query)
             cursor.execute(create_genomes_table_query)
+            cursor.execute(create_statistical_result_table_query)
             connection.commit()
 
             for idx, name in enumerate(["gene_files", "genome_files"]):
